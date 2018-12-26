@@ -4,6 +4,8 @@ const scGap : number = 0.05
 const strokeFactor : number = 90
 const sizeFactor : number = 3
 const color : string = "#4527A0"
+const lines : number = 4
+const nodes : number = 5
 
 const maxScale : Function = (scale : number, i : number, n : number) : number => Math.max(0, scale - i / n)
 
@@ -18,6 +20,36 @@ const mirrorValue : Function = (scale : number, a : number, b : number) : number
 
 const updateScale : Function = (scale : number, dir : number, a : number, b : number) : number => {
     return mirrorValue(scale, a, b) * scGap * dir
+}
+
+const drawPE180Node : Function = (context : CanvasRenderingContext2D, i : number, scale : number) => {
+    const gap : number = w / (nodes + 1)
+    const size : number = gap / sizeFactor
+    context.strokeStyle = color
+    context.lineCap = 'round'
+    context.lineWidth = Math.min(w, h) / strokeFactor
+    const sc1 : number = divideScale(scale, 0, 2)
+    const sc2 : number = divideScale(scale, 1, 2)
+    context.save()
+    context.translate(gap * (i + 1), h / 2)
+    for (var j = 0; j < lines; j++) {
+        const scj : number = divideScale(sc1, j, lines)
+        const sck : number = divideScale(sc2, j, lines)
+        context.save()
+        context.rotate(Math.PI / 2 * j)
+        context.translate(size / 2, 0)
+        for (var k = 0; k < 2; k++) {
+            context.save()
+            context.rotate(Math.PI * j * sck)
+            context.beginPath()
+            context.moveTo(-size/2 * (1 - scj), 0)
+            context.lineTo(-size/2, 0)
+            context.stroke()
+            context.restore()
+        }
+        context.restore()
+    }
+    context.restore()
 }
 
 class Plus180ExpanderStage {
