@@ -165,7 +165,7 @@ class PE180Node {
     }
 }
 
-class Plue180Expander {
+class Plus180Expander {
     root : PE180Node = new PE180Node(0)
     curr : PE180Node = this.root
     dir : number = 1
@@ -184,5 +184,26 @@ class Plue180Expander {
 
     startUpdating(cb : Function) {
         this.curr.startUpdating(cb)
+    }
+}
+
+class Renderer {
+    pe180 : Plus180Expander = new Plus180Expander()
+    animator : Animator = new Animator()
+
+    render(context : CanvasRenderingContext2D) {
+        this.pe180.draw(context)
+    }
+
+    handleTap(cb : Function) {
+        this.pe180.startUpdating(() => {
+            this.animator.start(() => {
+                cb()
+                this.pe180.update(() => {
+                    this.animator.stop()
+                    cb()
+                })
+            })
+        })
     }
 }
