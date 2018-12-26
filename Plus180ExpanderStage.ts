@@ -6,12 +6,13 @@ const sizeFactor : number = 3
 const color : string = "#4527A0"
 const lines : number = 4
 const nodes : number = 5
+const delay : number = 40
 
 const maxScale : Function = (scale : number, i : number, n : number) : number => Math.max(0, scale - i / n)
 
-const divideScale : Function = (scale : number, i : number, n : number) : number => Math.min(1/n, maxScale(scale, i, n))
+const divideScale : Function = (scale : number, i : number, n : number) : number => Math.min(1/n, maxScale(scale, i, n)) * n
 
-const scaleFactor : Function = (scale : number) : number => Math.floor(this / scDiv)
+const scaleFactor : Function = (scale : number) : number => Math.floor(scale / scDiv)
 
 const mirrorValue : Function = (scale : number, a : number, b : number) : number => {
     const k : number = scaleFactor(scale)
@@ -36,15 +37,17 @@ const drawPE180Node : Function = (context : CanvasRenderingContext2D, i : number
         const scj : number = divideScale(sc1, j, lines)
         const sck : number = divideScale(sc2, j, lines)
         context.save()
-        context.rotate(Math.PI / 2 * j)
+        context.rotate((Math.PI / 2) * j)
         context.translate(size / 2, 0)
         for (var k = 0; k < 2; k++) {
             context.save()
-            context.rotate(Math.PI * j * sck)
-            context.beginPath()
-            context.moveTo(-size/2 * (1 - scj), 0)
-            context.lineTo(-size/2, 0)
-            context.stroke()
+            context.rotate(Math.PI * k * sck)
+            if (scale > 0) {
+                context.beginPath()
+                context.moveTo(-size/2 * (1 - scj), 0)
+                context.lineTo(-size/2, 0)
+                context.stroke()
+            }
             context.restore()
         }
         context.restore()
@@ -91,11 +94,13 @@ class State {
     dir : number = 0
     prevScale : number = 0
     update(cb : Function) {
-        this.scale += updateScale(this.scale, lines, lines)
+        this.scale += updateScale(this.scale,this.dir, lines, lines)
+        console.log(this.scale)
         if (Math.abs(this.scale - this.prevScale) > 1) {
             this.scale = this.prevScale + this.dir
             this.dir = 0
             this.prevScale = this.scale
+            cb()
         }
     }
 
@@ -114,7 +119,7 @@ class Animator {
     start(cb : Function) {
         if (!this.animated) {
             this.animated = true
-            this.interval = setInterval(cb, 50)
+            this.interval = setInterval(cb, delay)
         }
     }
 
